@@ -3,15 +3,16 @@ import asyncio
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
+from sqlmodel import SQLModel
 
 from alembic import context
 
 from assessment.settings import settings
-from assessment.db.sqlalchemy import Base
 
-target_metadata = Base.metadata
-
+# Import all models so they are registered with SQLModel.metadata
 from assessment.models import *
+
+target_metadata = SQLModel.metadata
 
 
 def do_run_migrations(connection: Connection) -> None:
