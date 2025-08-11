@@ -42,7 +42,7 @@ const datasets = computed(() => {
     return datasetStore.datasets;
 });
 
-async function deleteDataset(dataset: { id: number }) {
+async function deleteDataset(dataset: { id: string }) {
     await datasetStore.deleteDataset(dataset.id);
 }
 
