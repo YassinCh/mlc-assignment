@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "assessment"
+version = "1.0.1"
+description = "MLC Developer assessment"
+authors = ["MLC dev team"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.104.1"
+uvicorn = "^0.23.2"
+pydantic = "^2.4.2"
+pydantic-settings = "^2.0.3"
+sqlalchemy = "^2.0.23"
+asyncpg = "^0.28.0"
+alembic = "^1.13.1"
+openpyxl = "^3.1.2"
+python-multipart = "^0.0.9"
+
+[tool.poetry.extras]
+asyncio = ["sqlalchemy"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
