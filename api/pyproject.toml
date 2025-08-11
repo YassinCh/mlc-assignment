@@ -15,6 +15,7 @@ asyncpg = "^0.28.0"
 alembic = "^1.13.1"
 openpyxl = "^3.1.2"
 python-multipart = "^0.0.9"
+sqlmodel = "^0.0.24"
 
 [tool.poetry.extras]
 asyncio = ["sqlalchemy"]
