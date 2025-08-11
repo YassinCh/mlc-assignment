@@ -1,8 +1,13 @@
 from collections.abc import AsyncGenerator
 
 from fastapi import Depends
+from sqlalchemy.ext.asyncio import (
+    AsyncConnection,
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+)
 from starlette.requests import Request
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncConnection, AsyncSession, async_sessionmaker
 
 
 def _get_db_connection(request: Request) -> AsyncEngine:
@@ -18,7 +23,7 @@ async def get_db_connection(
 ) -> AsyncGenerator[AsyncConnection, None]:
     async with engine.connect() as conn:
         yield conn
-    
+
 
 async def get_db_session(
     session_factory: async_sessionmaker[AsyncSession] = Depends(_get_db_session),

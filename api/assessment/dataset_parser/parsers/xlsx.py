@@ -1,20 +1,53 @@
 from io import BytesIO
+
+from openpyxl import load_workbook
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from assessment.dataset.model import Dataset
+from ...models.dataset import Dataset
+from ...models.dataset_feature import DatasetFeature
+from ...models.dataset_product import DatasetProduct
+from ...models.dataset_value import DatasetValue
 
 
 class XlsxParser:
-
     def __init__(self, session: AsyncSession, dataset: Dataset):
         self.session = session
         self.dataset = dataset
 
     async def parse(self, bytes: BytesIO):
-        # TODO: Maak van een bytesIO object een Excel file en parse deze naar een Dataset object.
-        # Hints:
-        # - De `self.session: AsyncSession` is al een instantie van een SqlAlchemy sessie, deze hoef je dus niet opnieuw te maken.
-        # - Maak gebruik van OpenPyXL om de Excel file te openen (https://openpyxl.readthedocs.io/en/stable/tutorial.html)
-        # - Kijk naar de documentatie van SqlAlchemy (https://docs.sqlalchemy.org/en/20/orm/quickstart.html)
-        # - Wij maken gebruik van AsyncIO dus je moet de async variant van SqlAlchemy gebruiken (https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#synopsis-orm)
-        raise NotImplementedError()
+        worksheet = load_workbook(bytes).active
+        if not worksheet:
+            raise ValueError("No Worksheet in excel")
+
+        rows = list(worksheet.iter_rows(values_only=True))
+        if not rows:
+            return
+
+        features = [
+            DatasetFeature(dataset_id=self.dataset.id, name=str(header))
+            for header in rows[0]
+            if header is not None
+        ]
+        self.session.add_all(features)
+        await self.session.flush()
+
+        products = [
+            DatasetProduct(dataset_id=self.dataset.id) for row in rows[1:] if any(row)
+        ]
+        self.session.add_all(products)
+        await self.session.flush()
+
+        for product, row in zip(products, (r for r in rows[1:] if any(r))):
+            self.session.add_all(
+                [
+                    DatasetValue(
+                        product_id=product.id,
+                        feature_id=features[i].id,
+                        value=str(cell),
+                    )
+                    for i, cell in enumerate(row[: len(features)])
+                    if cell is not None
+                ]
+            )
+
+        await self.session.commit()

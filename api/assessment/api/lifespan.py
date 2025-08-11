@@ -3,8 +3,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from assessment.db.sqlalchemy import init_async_engine
-from assessment.settings import settings
+from ..db.sqlalchemy import init_async_engine
+from ..settings import settings
 
 
 @asynccontextmanager
