@@ -17,7 +17,7 @@ export const useDatasetStore = defineStore("datasets", () => {
         }
     }
 
-    async function deleteDataset(id: number): Promise<void> {
+    async function deleteDataset(id: string): Promise<void> {
         try {
             const response = await api.delete(`/datasets/${id}`);
             if (response.status !== 204) {

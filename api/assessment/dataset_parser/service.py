@@ -1,16 +1,17 @@
 from datetime import datetime
 from io import BytesIO
+from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from assessment.dataset.model import Dataset
-from assessment.dataset.service import DatasetService
-from assessment.dataset_parser.parsers.xlsx import XlsxParser
+from ..dataset_parser.parsers.xlsx import XlsxParser
+from ..db.base_service import BaseService
+from ..models.dataset import Dataset
 
 
-class DatasetParserService:
+class DatasetParserService(BaseService[Dataset]):
     def __init__(self, session: AsyncSession):
-        self.session = session
+        super().__init__(session, Dataset)
 
     async def create_dataset_from_excel(
         self,
@@ -18,8 +19,10 @@ class DatasetParserService:
         dataset_name: str,
         created_at: datetime | None = None,
     ) -> Dataset:
-        dataset_service = DatasetService(self.session)
-        dataset = await dataset_service.create(dataset_name, created_at)
+        kwargs: dict[str, Any] = {"name": dataset_name}
+        if created_at is not None:
+            kwargs["created_at"] = created_at
+        dataset = await self.create(**kwargs)
         xlsx_parser = XlsxParser(self.session, dataset)
         await xlsx_parser.parse(bytes)
         return dataset

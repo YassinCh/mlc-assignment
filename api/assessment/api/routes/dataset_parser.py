@@ -1,13 +1,12 @@
 import traceback
-
 from io import BytesIO
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from assessment.dataset_parser.service import DatasetParserService
-from assessment.dataset_parser.schemas import UploadedDataset
-from assessment.api.fastapi.dependencies import get_db_session
+from ...dataset_parser.schemas import UploadedDataset
+from ...dataset_parser.service import DatasetParserService
+from ..dependencies import get_db_session
 
 router = APIRouter(prefix="/dataset_parsers")
 
@@ -30,8 +29,7 @@ async def upload_dataset(
     dataset = None
     try:
         dataset = await dataset_service.create_dataset_from_excel(
-            bytes=buffer, 
-            dataset_name=dataset_name,
+            bytes=buffer, dataset_name=dataset_name
         )
         await session.commit()
     except Exception:
@@ -40,6 +38,6 @@ async def upload_dataset(
         raise HTTPException(status_code=500, detail="Error during dataset creation")
 
     buffer.close()
-    
+
     schema = UploadedDataset.model_validate(dataset)
     return schema
